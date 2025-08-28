@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcce6 0%, #e6ccff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            background-color: #fff5f9;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(199, 90, 159, 0.2);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            border: 3px solid #ff66b2;
+            position: relative;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background: #ff85c8;
+            border-radius: 0 0 20px 20px;
+            z-index: 1;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: linear-gradient(to right, #ff85c8, #d9adff);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "★";
+            position: absolute;
+            color: rgba(255,255,255,0.2);
+            font-size: 200px;
+            top: -70px;
+            left: -40px;
+            transform: rotate(-20deg);
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            font-size: 32px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #d44d99;
+            position: relative;
+        }
+        
+        .header h1::after {
+            content: " ✎";
+            font-size: 28px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+            text-shadow: 1px 1px 0px #d44d99;
+            position: relative;
+        }
+        
+        .input-section {
+            display: flex;
+            padding: 20px;
+            border-bottom: 2px dashed #ffb3d9;
+            background: #fff0f7;
+        }
+        
+        #input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #ffb3e6;
+            border-radius: 12px 0 0 12px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            background: #fffaff;
+            color: #b366b3;
+        }
+        
+        #input:focus {
+            border-color: #d9adff;
+            box-shadow: 0 0 0 3px rgba(217, 173, 255, 0.3);
+        }
+        
+        #input::placeholder {
+            color: #d9adff;
+        }
+        
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        #add-btn {
+            background: linear-gradient(to right, #ff85c8, #d9adff);
+            color: white;
+            padding: 0 25px;
+            border-radius: 0 12px 12px 0;
+            font-weight: 700;
+            font-size: 16px;
+            text-shadow: 1px 1px 0px #d44d99;
+            box-shadow: 3px 3px 0px #ffb3e6;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #add-btn:hover {
+            opacity: 0.9;
+            box-shadow: 2px 2px 0px #ffb3e6;
+            transform: translate(1px, 1px);
+        }
+        
+        #add-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #ffb3e6;
+        }
+        
+        #add-btn::after {
+            content: " ✿";
+            font-size: 18px;
+        }
+        
+        .list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="10" cy="10" r="2" fill="%23ffcce6" /></svg>');
+        }
+        
+        .list-container::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .list-container::-webkit-scrollbar-track {
+            background: #ffe6f2;
+            border-radius: 10px;
+        }
+        
+        .list-container::-webkit-scrollbar-thumb {
+            background: #ff99cc;
+            border-radius: 10px;
+            border: 2px solid #ffe6f2;
+        }
+        
+        .list-container::-webkit-scrollbar-thumb:hover {
+            background: #ff66b2;
+        }
+        
+        ul {
+            list-style-type: none;
+        }
+        
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 25px;
+            border-bottom: 2px dotted #ffcce6;
+            animation: fadeIn 0.5s;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        
+        li:last-child {
+            border-bottom: none;
+        }
+        
+        li:hover {
+            background-color: #fffaff;
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(255, 153, 204, 0.2);
+        }
+        
+        li .task {
+            flex: 1;
+            font-size: 18px;
+            word-break: break-word;
+            padding-right: 15px;
+            color: #b366b3;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        li .task::before {
+            content: "❀";
+            position: absolute;
+            left: 0;
+            color: #ff85c8;
+            font-size: 16px;
+        }
+        
+        li .delete-btn {
+            background: linear-gradient(to right, #ff99cc, #ff66b2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 2px 2px 0px #ffcce6;
+        }
+        
+        li .delete-btn:hover {
+            background: linear-gradient(to right, #ff66b2, #ff3399);
+            box-shadow: 1px 1px 0px #ffcce6;
+            transform: translate(1px, 1px);
+        }
+        
+        li .delete-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px #ffcce6;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #d9adff;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            margin-bottom: 15px;
+            color: #ffb3e6;
+            text-shadow: 3px 3px 0px rgba(255, 255, 255, 0.8);
+        }
+        
+        .empty-state p {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 25px;
+            background: linear-gradient(to right, #ffcce6, #e6ccff);
+            color: #b366b3;
+            font-size: 15px;
+            font-weight: bold;
+            border-top: 3px solid #ff99cc;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px) rotate(-2deg); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) rotate(0); 
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-15px);}
+            60% {transform: translateY(-7px);}
+        }
+        
+        .bounce {
+            animation: bounce 1s;
+        }
+        
+        @media (max-width: 500px) {
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .input-section {
+                padding: 15px;
+            }
+            
+            li {
+                padding: 14px 15px;
+            }
+            
+            .stats {
+                padding: 12px 15px;
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+        }
+        
+        .hearts {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            color: #f58ac0;
+        }
+        
+        @keyframes float {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(20deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-heart"></i>To-Do List</h1>
+            <p>Add your tasks and stay organized in style!</p>
+        </div>
+        
+        <div class="input-section">
+            <input id="input" type="text" placeholder="Enter a new task...">
+            <button id="add-btn" onclick="add()">Add</button>
+        </div>
+        
+        <div class="list-container">
+            <ul id="list">
+                <!-- Tasks will be added here dynamically -->
+            </ul>
+            
+            <div id="empty-state" class="empty-state">
+                <i class="fas fa-star"></i>
+                <p>No tasks yet. Add your first task!</p>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <span id="total-tasks">Total: 0 tasks</span>
+            <span id="completed-tasks">Completed: 0 tasks</span>
+        </div>
+    </div>
+
+    <div class="hearts" id="hearts"></div>
+
+    <script>
+        const ul = document.getElementById("list");
+        const input = document.getElementById("input");
+        const emptyState = document.getElementById("empty-state");
+        const totalTasksEl = document.getElementById("total-tasks");
+        const completedTasksEl = document.getElementById("completed-tasks");
+        const heartsContainer = document.getElementById("hearts");
+        
+        let tasks = [];
+        let taskId = 0;
+        
+        // Load tasks from localStorage if available
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('cuteTodoTasks');
+            if (savedTasks) {
+                tasks = JSON.parse(savedTasks);
+                taskId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 0;
+                renderTasks();
+            }
+            updateEmptyState();
+            updateStats();
+        }
+        
+        // Save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('cuteTodoTasks', JSON.stringify(tasks));
+            updateStats();
+        }
+        
+        // Create floating hearts animation
+        function createHearts() {
+            for (let i = 0; i < 5; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤';
+                heart.classList.add('heart');
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.top = Math.random() * 100 + '%';
+                heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                heart.style.animation = `float ${Math.random() * 3 + 2}s linear forwards`;
+                heartsContainer.appendChild(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                }, 5000);
+            }
+        }
+        
+        // Add a new task
+        function add() {
+            const taskText = input.value.trim();
+            if (taskText === "") return;
+            
+            // Create hearts animation when adding a task
+            createHearts();
+            
+            const task = {
+                id: taskId++,
+                text: taskText,
+                completed: false,
+                timestamp: new Date().toISOString()
+            };
+            
+            tasks.push(task);
+            renderTasks();
+            saveTasks();
+            
+            input.value = "";
+            input.focus();
+        }
+        
+        // Delete a task
+        function deleteItem(id) {
+            // Create hearts animation when deleting a task
+            createHearts();
+            
+            tasks = tasks.filter(task => task.id !== id);
+            renderTasks();
+            saveTasks();
+        }
+        
+        // Toggle task completion
+        function toggleComplete(id) {
+            const task = tasks.find(task => task.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+                saveTasks();
+                
+                // Create hearts animation when completing a task
+                if (task.completed) {
+                    createHearts();
+                }
+            }
+        }
+        
+        // Render all tasks
+        function renderTasks() {
+            ul.innerHTML = "";
+            
+            tasks.forEach(task => {
+                const li = document.createElement("li");
+                
+                const taskSpan = document.createElement("span");
+                taskSpan.className = "task";
+                taskSpan.textContent = task.text;
+                if (task.completed) {
+                    taskSpan.style.textDecoration = "line-through";
+                    taskSpan.style.color = "#d9adff";
+                }
+                
+                taskSpan.addEventListener("click", () => toggleComplete(task.id));
+                
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "delete-btn";
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete';
+                deleteBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    deleteItem(task.id);
+                });
+                
+                li.appendChild(taskSpan);
+                li.appendChild(deleteBtn);
+                ul.appendChild(li);
+            });
+            
+            updateEmptyState();
+        }
+        
+        // Show or hide empty state
+        function updateEmptyState() {
+            if (tasks.length === 0) {
+                emptyState.style.display = "block";
+            } else {
+                emptyState.style.display = "none";
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            
+            totalTasksEl.textContent = `Total: ${total} task${total !== 1 ? 's' : ''}`;
+            completedTasksEl.textContent = `Completed: ${completed} task${completed !== 1 ? 's' : ''}`;
+        }
+        
+        // Allow adding task with Enter key
+        input.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                add();
+            }
+        });
+        
+        // Initialize the app
+        loadTasks();
+        
+        // Create some random hearts on page load
+        setInterval(createHearts, 1000);
+    </script>
+</body>
+</html>
